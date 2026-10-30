@@ -1,32 +1,30 @@
+// Conservamos la API de M2 y aÃ±adimos cancelaciÃ³n con AbortController.
 const API = "https://mirror.hinamizawa.ai";
 
-export async function buscarMapas(consulta) {
-  const clave = `aerobeat-v1:${consulta}`;
-  // La caché es opcional: un fallo del almacenamiento no impide buscar.
+export async function buscarMapas(consulta, signal) {
+  const clave = `aerobeat-v1:${consulta.toLowerCase()}`;
   try {
     const guardados = JSON.parse(localStorage.getItem(clave));
-    if (Array.isArray(guardados)) {
-      return { datos: guardados, origen: "caché local" };
+    if (Array.isArray(guardados) && guardados.length > 0) {
+      return { datos: guardados, origen: "cachÃ© local" };
     }
   } catch {
-    // JSON corrupto o almacenamiento bloqueado: consultamos la API.
+    // Si falla localStorage, seguimos con la peticiÃ³n de red.
   }
 
   const parametros = new URLSearchParams({ q: consulta, amount: "24" });
-  const respuesta = await fetch(`${API}/api/v2/search?${parametros}`);
+  const respuesta = await fetch(`${API}/api/v2/search?${parametros}`, { signal });
   if (!respuesta.ok) {
-    throw new Error(`El servidor respondió con HTTP ${respuesta.status}.`);
+    throw new Error(`El servidor respondiÃ³ con HTTP ${respuesta.status}.`);
   }
   const datos = await respuesta.json();
   if (!Array.isArray(datos)) {
     throw new Error("La API no ha devuelto una lista de mapas.");
   }
-
   try {
-    // No guardamos vacíos: el proveedor también devuelve [] ante ciertas caídas.
     if (datos.length > 0) localStorage.setItem(clave, JSON.stringify(datos));
   } catch {
-    // Si no queda espacio, los resultados siguen funcionando sin caché.
+    // Un almacenamiento lleno no impide mostrar los resultados.
   }
   return { datos, origen: "API hinai" };
 }
