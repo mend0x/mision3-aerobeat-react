@@ -179,3 +179,24 @@ h3 { font-size: 19px; font-weight: 600; line-height: 1.25; margin: 0 0 7px; over
   .portada { height: 130px; }
   .pie { flex-direction: column; align-items: flex-start; gap: 5px; }
 }
+
+/* Mejoras de M3 sobre el diseÃ±o original de M2 */
+button:disabled { cursor: progress; opacity: .7; }
+.filtros button { padding: 7px 12px; font-size: 12px; }
+.filtros button.activo { background: linear-gradient(#eaffeb, #8ed6ae); }
+.extras { margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0edf2; }
+.extras button { font-size: 11px; padding: 7px 9px; }
+.extras button[aria-pressed="true"] { background: linear-gradient(#ebfff2, #a7e0bf); }
+.tarjeta.seleccionada { outline: 3px solid #398fca; outline-offset: 1px; }
+.mensaje { margin: 14px 0 20px; padding: 13px; background: #e5f5fa; border-radius: 5px; font-size: 13px; }
+.mensaje.error { color: #8b2020; background: #ffefeb; }
+.resumen { margin: 12px 0 18px; font-size: 12px; color: #456478; }
+.comparador { margin: 16px 0 20px; padding: 16px; background: #e2f5ee; border: 1px solid #8fcdbd; border-radius: 8px; }
+.comparador-titulo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.comparador-titulo button { padding: 5px 12px; font-size: 12px; }
+.comparador p { font-size: 12px; line-height: 1.5; }
+.comparador-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.comparador-columnas > div { min-width: 0; padding: 12px; background: #fff; border-radius: 6px; }
+.comparador-columnas strong, .comparador-columnas span { display: block; overflow-wrap: anywhere; }
+.comparador-columnas span { font-size: 11px; margin-top: 6px; }
+@media (max-width: 560px) { .comparador-columnas { grid-template-columns: 1fr; } }
