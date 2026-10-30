@@ -1,142 +1,86 @@
-# Aerobeat
+# Aerobeat React â€” M3 Â· Reactor Core
 
-M2 · Async Odyssey — Web Development I — @Mendo.
+**Alumno:** @Mendo Â· Web Development I Â· U-tad
 
-Buscador de mapas de osu! con estética Frutiger Aero: busca una canción,
-filtra los sets por modo de juego y descarga su archivo `.osz`.
-JavaScript puro, HTML y CSS. Vite es la única dependencia de desarrollo.
+**Origen:** evoluciÃ³n de [M2 Â· Async Odyssey](https://github.com/mend0x/mision2). El nuevo repositorio conserva la historia de commits de M2 y aÃ±ade los cambios de M3. No es una aplicaciÃ³n sin relaciÃ³n con la misiÃ³n anterior.
 
-## Cómo ejecutarlo
+## QuÃ© hace
 
-Necesitas Node.js 22.12 o posterior y npm. Desde esta carpeta:
+Busca hasta 24 sets de mapas de osu! con la API de hinai, permite filtrar por modo de juego, abrir la ficha y descargar el `.osz`. Conserva la estÃ©tica Frutiger Aero de M2. Las novedades de M3 son **favoritos persistentes** (tambiÃ©n visibles sin conexiÃ³n si ya estaban guardados) y **comparaciÃ³n de dos sets** segÃºn su nÃºmero de dificultades. Si eliges un tercero, sustituye al primero. La informaciÃ³n de dificultades es cuantitativa: mÃ¡s dificultades no significa necesariamente mayor dificultad tÃ©cnica.
+
+## InstalaciÃ³n
+
+Requisitos: Node.js 22.12 o superior, npm.
 
 ```bash
-npm ci
+npm install
 npm run dev
 ```
 
-Abre la dirección que indique Vite. No abras `index.html` con doble clic:
-los módulos ES necesitan servirse por HTTP.
+Para comprobar la entrega:
 
 ```bash
+npm run lint
 npm run build
-npm run preview
 ```
 
-El primer comando genera `dist/` con rutas relativas; el segundo sirve esa compilación.
-Ni `node_modules/` ni `dist/` se suben a GitHub. Sí se sube `package-lock.json`.
+## EvoluciÃ³n tÃ©cnica de M2 a M3
 
-## Cómo usarlo
+| En M2 (JavaScript puro) | En M3 (React 19) |
+| --- | --- |
+| `querySelector`, `innerHTML`, `createElement` | Componentes JSX que React actualiza |
+| `main.js` coordina el DOM | `App.jsx` mantiene el estado compartido |
+| `render.js` dibuja tarjetas manualmente | `ListaMapas` y `TarjetaMapa` con `map` y `key={mapa.id}` |
+| Filtros mediante DOM | `filtrarMapas` produce valores derivados |
+| `fetch` controlado desde eventos | `useEffect` consulta la API y cancela con `AbortController` |
+| CachÃ© por consulta | Se mantiene la cachÃ© original de M2 en `api.js` |
 
-1. Al entrar se busca «nevada» como ejemplo real.
-2. Escribe una canción, artista o creador y pulsa Buscar mapas o Intro.
-3. El selector filtra localmente los primeros 24 resultados recibidos, no todo el catálogo.
-4. Descargar .osz abre la descarga del set completo. Abre el archivo con osu! para instalarlo.
-5. Ver en osu! abre la ficha oficial. Este proyecto no solicita cuentas ni claves.
+## Estructura y responsabilidades
 
-Un **set** agrupa varias dificultades. El filtro conserva los sets que contienen al menos
-una dificultad del modo elegido; el contador suma todas las dificultades de esos sets.
-El servicio puede devolver menos de 24 resultados. No hay paginación.
+- `src/App.jsx`: estado compartido, bÃºsqueda, favoritos, comparaciÃ³n y props.
+- `src/components/Buscador.jsx`: formulario controlado, recibe valor y eventos por props.
+- `src/components/Filtros.jsx`: modo y selector de biblioteca.
+- `src/components/ListaMapas.jsx`: mensajes condicionales y lista con keys estables.
+- `src/components/TarjetaMapa.jsx`: tarjeta reutilizable y acciones.
+- `src/components/Comparador.jsx`: comparaciÃ³n derivada de dos mapas.
+- `src/hooks/useLocalStorage.js`: hook reutilizable de estado persistente, con sincronizaciÃ³n entre pestaÃ±as y cleanup.
+- `src/api.js`: fetch, comprobaciÃ³n HTTP, cachÃ©, enlace de descarga.
+- `src/logica.js`: transformar, filtrar y contar sin mutar arrays.
+- `src/style.css`: estilo Frutiger Aero de M2 ampliado para M3.
 
-## Estructura y rúbrica
+## Estado, efectos y listas
 
-| Archivo | Responsabilidad | Contenido del temario |
-| --- | --- | --- |
-| `src/main.js` | Eventos, estado y coordinación | U1: variables, funciones, DOM y eventos. U2: módulos y try/catch/finally |
-| `src/api.js` | Fetch, validación de respuesta, caché y URL de descarga | U2: async/await, fetch, Error, JSON, localStorage y URLSearchParams |
-| `src/logica.js` | Preparar datos, filtrar y contar | U1: tipos, condicionales y objetos. U2: map, filter, some y reduce |
-| `src/render.js` | Mostrar mensajes y crear tarjetas | U1: querySelector, createElement, appendChild, textContent y classList |
-| `src/style.css` | Toda la presentación adaptable | HTML/CSS, conocimientos previos de U1 |
+`consulta` representa el texto que se escribe; `peticion` identifica la bÃºsqueda enviada. Separarlos permite escribir sin solicitar la API en cada tecla y repetir una consulta al pulsar Buscar. `resultado` guarda datos y estado de la peticiÃ³n (cargando/error/origen). `modo`, `soloFavoritos` y `seleccion` son estados pequeÃ±os. Los mapas visibles y los comparados **se derivan durante el render**; no se duplican en `useState`.
 
-`map` convierte los objetos de la API en objetos pequeños con nombres en castellano.
-`filter` descarta IDs inválidos y aplica el modo seleccionado.
-`some` comprueba si un set contiene el modo pedido.
-`reduce` suma las dificultades antes de pintarlas. `forEach` solo inserta las tarjetas en el DOM.
-`Array.isArray` y `Number.isInteger` son comprobaciones nativas del tipo de los datos recibidos.
-
-Durante una consulta se muestra la carga y se deshabilita el formulario para evitar
-peticiones solapadas. `finally` siempre lo habilita de nuevo. El `catch` muestra el error
-y permite reintentar con el mismo botón. Una lista vacía muestra un mensaje específico.
-Los títulos, artistas y creadores entran mediante `textContent`: el `innerHTML` de las
-tarjetas es una plantilla fija sin texto externo. Las portadas tienen un fondo de color
-si no cargan; sus URLs se construyen únicamente con IDs numéricos válidos.
-
-## API y caché
-
-- Búsqueda: `https://mirror.hinamizawa.ai/api/v2/search?q=nevada&amount=24`.
-- Descarga: `https://mirror.hinamizawa.ai/api/v1/hinai/d/476587`.
-- Documentación: https://mirror.hinamizawa.ai/docs/beatmap-search y https://mirror.hinamizawa.ai/docs/beatmap-download.
-- Portadas: `https://assets.ppy.sh/beatmaps/ID/covers/cover.jpg`.
-
-La idea original proponía osu.direct. Durante la preparación devolvió un desafío de
-Cloudflare con HTTP 403. Se eligió hinai, un mirror compatible, para conservar la idea
-sin añadir un proxy, backend, SDK ni autenticación. Su búsqueda respondió con
-`Access-Control-Allow-Origin: *` y la descarga de prueba no pidió login.
-
-El bonus guarda cada búsqueda no vacía en `localStorage` usando una clave
-`aerobeat-v1:consulta`. Repetirla evita otro fetch, incluso tras recargar.
-El mensaje distingue API y caché. Si el JSON está corrupto o el almacenamiento no
-está disponible, se consulta la red. Si está lleno, se muestran igualmente los datos.
-La caché no caduca: para actualizar una búsqueda, elimina su clave desde
-DevTools → Application → Local Storage. No se guardan resultados vacíos porque
-el proveedor también puede responder `[]` cuando fallan sus fuentes.
+El efecto de bÃºsqueda depende de `peticion`, lee un servicio externo y cancela la peticiÃ³n anterior durante la limpieza (`AbortController`). El hook `useLocalStorage` usa un efecto `[clave, valor]` para guardar y otro `[clave]` para escuchar `storage`, retirando el listener en el cleanup. La vista muestra mensajes diferentes ante carga, error, vacÃ­o y resultados; `key={mapa.id}` es estable. `setFavoritos` y `setSeleccion` usan actualizaciones funcionales e inmutables.
 
 ## Uso de IA
 
-Herramienta: ChatGPT / Codex. Se le aportó el enunciado, los PDF del temario, los
-repositorios de referencia, la idea de osu! y la dirección visual Frutiger Aero, con la intención de darle el mejor contexto.
-La IA redactó parte de el código y los estilos, también hizo las comprobaciones
-técnicas indicadas abajo.
-
-Extractos reales del encargo:
-
-> «Busca repositorios que contengan elementos de CSS estilo "frutiger aero"»
-
-> «Como podría acortar mas el código implementado en "logica.js"»
+Se ha utilizado ChatGPT para analizar el cÃ³digo pÃºblico de M2, proponer la migraciÃ³n a React 19, generar componentes JSX, diseÃ±ar los nuevos estados y efectos, crear el hook de persistencia, ampliar el diseÃ±o, redactar esta documentaciÃ³n y sugerir comprobaciones. La base de la aplicaciÃ³n, la API, la lÃ³gica de filtrado y la estÃ©tica vienen de M2. Se declara este apoyo y no se presenta la generaciÃ³n automÃ¡tica como cÃ³digo escrito sin asistencia. El alumno es responsable de ejecutar, comprobar y comprender el cÃ³digo antes de defenderlo lÃ­nea a lÃ­nea.
 
 ## Autopsia
 
-Estas son las dos decisiones principales de la implementación propuesta con IA;
-el alumno debe valorarlas y hacerlas suyas antes de defender la entrega.
+1. **DecisiÃ³n: conservar M2 en lugar de empezar otra idea.** Esto demuestra la diferencia entre una interfaz imperativa y una declarativa. Se eliminan los archivos que manipulaban el DOM manualmente para no mantener dos implementaciones contradictorias.
+2. **DecisiÃ³n: evitar estado duplicado.** `visibles` se obtiene con `filter`, y los mapas de la comparaciÃ³n con `find`. No existe un efecto para recalcular lo que ya sabemos con JavaScript.
+3. **DecisiÃ³n: cancelar solicitudes.** Si se lanza otra bÃºsqueda o se desmonta el componente, el `AbortController` evita actualizar la interfaz con una respuesta obsoleta.
+4. **DecisiÃ³n: favoritos locales.** `useLocalStorage` evita montar un backend. A cambio, los favoritos dependen del navegador y pueden perderse al borrar sus datos.
+5. **DecisiÃ³n: comparar nÃºmero de dificultades.** No interpretamos ese nÃºmero como dificultad real de jugar. Es una comparaciÃ³n sencilla, comprensible y honesta con los datos disponibles.
 
-1. **Filtrar los 24 resultados en el cliente.** Permite usar `filter` con una finalidad
-   visible y cambiar de modo sin más peticiones. Se descartó filtrar y paginar todo en
-   el servidor para mantener poco estado y poco código. Coste: un modo puede quedar
-   vacío aunque existan más mapas de ese modo fuera de la primera página; la interfaz
-   indica el alcance del filtro.
-2. **Caché sencilla sin caducidad y formulario bloqueado durante la búsqueda.** Se
-   descartaron temporizadores de caducidad y cancelación de peticiones para mantener
-   el flujo fácil de explicar. Coste: pueden verse metadatos antiguos y hay que esperar
-   al servidor antes de cambiar de búsqueda. Los errores de almacenamiento no impiden
-   usar la API; `finally` restaura el formulario cuando la petición termina o falla.
+## Limitaciones
 
-## Verificación
+- La API puede fallar, cambiar o devolver menos de 24 sets; los filtros afectan Ãºnicamente a los resultados recibidos.
+- Los mapas guardados en favoritos pueden contener metadatos antiguos.
+- La cachÃ© de bÃºsquedas no caduca automÃ¡ticamente (heredada de M2).
+- Los enlaces de descarga dependen de un tercero; una descarga no estÃ¡ garantizada.
+- Sin red no pueden realizarse nuevas bÃºsquedas, aunque los favoritos guardados sÃ­ pueden visualizarse.
 
-Comprobado por Codex durante la preparación:
+## Comprobaciones manuales
 
-- `npm run build`: compilación correcta con Vite 8.3.4.
-- API real: respuesta JSON, cabecera CORS y descarga de un `.osz` sin credenciales.
-- Pruebas temporales externas al proyecto, con DOM simulado: caché, almacenamiento
-  bloqueado/lleno, errores 404/429/500, fallo de red, JSON inválido, respuesta no-array,
-  vacíos, datos incompletos, filtros, suma, texto potencialmente malicioso, carga,
-  bloqueo de consultas simultáneas y recuperación tras error.
+1. Buscar `nevada`, cambiar de modo y comprobar el contador.
+2. Guardar un favorito, recargar y encontrarlo en `Mis favoritos`.
+3. Abrir la app en dos pestaÃ±as y comprobar que se sincronizan los favoritos.
+4. Comparar dos mapas y seleccionar un tercero para sustituir al primero.
+5. Buscar algo inexistente, comprobar el vacÃ­o y probar el modo sin conexiÃ³n.
+6. Ejecutar `npm run lint` y `npm run build` antes de entregar.
 
-Las pruebas de DOM usaron jsdom fuera de esta carpeta; no añade dependencias a la app.
-No se ha realizado una inspección visual en un navegador en este entorno.
-El buscador y las descargas dependen de la disponibilidad de servicios externos.
-Una descarga se abre como enlace, por lo que sus fallos los muestra el servidor en
-la nueva pestaña. Los fallos de búsqueda sí se muestran dentro de la aplicación.
-
-Antes de entregar: probar en el navegador, revisar móvil y escritorio, descargar un
-mapa, repetir una búsqueda y comprobar en Network que la caché evita la petición.
-Para probar el error de red, activar Offline y buscar un término nuevo no cacheado.
-
-## Referencias visuales
-
-Inspiración: la galería de https://osu.ppy.sh/beatmapsets y el cristal, azul/verde y
-brillos de https://github.com/maxik34/Project_7,
-https://github.com/TheAgencyMGE/aero-dock y
-https://github.com/GVPV12/aqua-frutiger-aero-blog.
-El diseño, el disco y los brillos se dibujan en CSS; no se copian sus assets ni plantillas.
-Las portadas pertenecen a los mapas y se sirven desde el CDN de osu!.
-Proyecto académico no oficial, sin afiliación con osu! ni hinai.
+No se incluyen `node_modules` ni `dist` en Git. Proyecto acadÃ©mico sin afiliaciÃ³n con osu! o hinai. Portadas de osu! y enlaces de terceros.
