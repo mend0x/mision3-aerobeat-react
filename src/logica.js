@@ -8,7 +8,7 @@ export function prepararMapas(datos) {
     .filter((mapa) => Number.isInteger(mapa?.id) && mapa.id > 0)
     .map((mapa) => ({
       id: mapa.id,
-      titulo: texto(mapa.title, "Sin tÃ­tulo"),
+      titulo: texto(mapa.title, "Sin título"),
       artista: texto(mapa.artist, "Artista desconocido"),
       creador: texto(mapa.creator, "Creador desconocido"),
       dificultades: Array.isArray(mapa.beatmaps)

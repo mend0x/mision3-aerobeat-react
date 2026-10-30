@@ -40,7 +40,7 @@ export default function App() {
     setSoloFavoritos(false);
     setSeleccion([]);
     setResultado({ mapas: [], origen: "", cargando: true, error: "" });
-    // numero permite volver a buscar el mismo texto al pulsar el botÃ³n.
+    // numero permite volver a buscar el mismo texto al pulsar el botón.
     setPeticion((anterior) => ({ texto, numero: anterior.numero + 1 }));
   }
 
@@ -68,14 +68,14 @@ export default function App() {
     <>
       <header className="cabecera">
         <a className="marca" href="./"><span className="orbe" aria-hidden="true">a</span> aerobeat</a>
-        <span className="subtitulo">M3 Â· Reactor Core Â· React 19</span>
+        <span className="subtitulo">M3 · Reactor Core · React 19</span>
         <a href="https://osu.ppy.sh/" target="_blank" rel="noopener noreferrer">Conoce osu!</a>
       </header>
       <main className="ventana">
-        <div className="barra-ventana"><span>Aerobeat / Explorador de mapas</span><span>EDICIÃ“N REACT</span></div>
+        <div className="barra-ventana"><span>Aerobeat / Explorador de mapas</span><span>EDICIÓN REACT</span></div>
         <section className="presentacion" aria-labelledby="titulo">
           <div>
-            <p className="antetitulo">MÃšSICA. CÃRCULOS. Y UN POCO DE NOSTALGIA.</p>
+            <p className="antetitulo">MÚSICA. CÍRCULOS. Y UN POCO DE NOSTALGIA.</p>
             <h1 id="titulo">Encuentra tu ritmo.</h1>
             <p>Busca mapas de osu!, guarda tus favoritos y compara dificultades.</p>
           </div>
@@ -95,7 +95,7 @@ export default function App() {
             onFavoritos={(activo) => { setSoloFavoritos(activo); setSeleccion([]); }}
             cantidad={favoritos.length}
           />
-          <div className="resultados-cabecera"><h2>{soloFavoritos ? "Mi biblioteca" : "Tu selecciÃ³n"}</h2></div>
+          <div className="resultados-cabecera"><h2>{soloFavoritos ? "Mi biblioteca" : "Tu selección"}</h2></div>
           <Comparador mapas={comparados} onLimpiar={() => setSeleccion([])} />
           <ListaMapas
             mapas={visibles}
@@ -110,11 +110,11 @@ export default function App() {
           />
         </section>
         <footer className="pie-ventana">
-          <span>Descarga el .osz y Ã¡brelo con osu! para instalarlo.</span>
-          <span>La API muestra como mÃ¡ximo 24 resultados por bÃºsqueda.</span>
+          <span>Descarga el .osz y ábrelo con osu! para instalarlo.</span>
+          <span>La API muestra como máximo 24 resultados por búsqueda.</span>
         </footer>
       </main>
-      <footer className="pie">La M2, reconstruida en React. <span>@Mendo Â· Web I</span></footer>
+      <footer className="pie">La M2, reconstruida en React. <span>@Mendo · Web I</span></footer>
     </>
   );
 }

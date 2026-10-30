@@ -1,4 +1,4 @@
-// Conservamos la API de M2 y aÃ±adimos cancelaciÃ³n con AbortController.
+// Conservamos la API de M2 y añadimos cancelación con AbortController.
 const API = "https://mirror.hinamizawa.ai";
 
 export async function buscarMapas(consulta, signal) {
@@ -6,16 +6,16 @@ export async function buscarMapas(consulta, signal) {
   try {
     const guardados = JSON.parse(localStorage.getItem(clave));
     if (Array.isArray(guardados) && guardados.length > 0) {
-      return { datos: guardados, origen: "cachÃ© local" };
+      return { datos: guardados, origen: "caché local" };
     }
   } catch {
-    // Si falla localStorage, seguimos con la peticiÃ³n de red.
+    // Si falla localStorage, seguimos con la petición de red.
   }
 
   const parametros = new URLSearchParams({ q: consulta, amount: "24" });
   const respuesta = await fetch(`${API}/api/v2/search?${parametros}`, { signal });
   if (!respuesta.ok) {
-    throw new Error(`El servidor respondiÃ³ con HTTP ${respuesta.status}.`);
+    throw new Error(`El servidor respondió con HTTP ${respuesta.status}.`);
   }
   const datos = await respuesta.json();
   if (!Array.isArray(datos)) {

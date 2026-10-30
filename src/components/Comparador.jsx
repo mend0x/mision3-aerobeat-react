@@ -6,7 +6,7 @@ export default function Comparador({ mapas, onLimpiar }) {
     : 0;
 
   return (
-    <section className="comparador" aria-label="ComparaciÃ³n de mapas">
+    <section className="comparador" aria-label="Comparación de mapas">
       <div className="comparador-titulo">
         <h2>Comparador de mapas</h2>
         <button type="button" onClick={onLimpiar}>Limpiar</button>
@@ -19,14 +19,14 @@ export default function Comparador({ mapas, onLimpiar }) {
             {mapas.map((mapa) => (
               <div key={mapa.id}>
                 <strong>{mapa.titulo}</strong>
-                <span>{mapa.artista} Â· {mapa.dificultades.length} dificultades</span>
+                <span>{mapa.artista} · {mapa.dificultades.length} dificultades</span>
               </div>
             ))}
           </div>
           <p>
             {diferencia === 0
-              ? "Ambos sets tienen el mismo nÃºmero de dificultades."
-              : `${mapas[0].dificultades.length > mapas[1].dificultades.length ? mapas[0].titulo : mapas[1].titulo} tiene ${diferencia} dificultades mÃ¡s.`}
+              ? "Ambos sets tienen el mismo número de dificultades."
+              : `${mapas[0].dificultades.length > mapas[1].dificultades.length ? mapas[0].titulo : mapas[1].titulo} tiene ${diferencia} dificultades más.`}
           </p>
         </>
       )}

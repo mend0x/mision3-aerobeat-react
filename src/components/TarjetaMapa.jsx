@@ -32,7 +32,7 @@ export default function TarjetaMapa({ mapa, favorito, seleccionado, onFavorito, 
             {favorito ? "Quitar favorito" : "Guardar favorito"}
           </button>
           <button type="button" onClick={() => onComparar(mapa.id)} aria-pressed={seleccionado}>
-            {seleccionado ? "Quitar comparaciÃ³n" : "Comparar"}
+            {seleccionado ? "Quitar comparación" : "Comparar"}
           </button>
         </div>
       </div>

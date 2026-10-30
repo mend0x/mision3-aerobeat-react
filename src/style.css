@@ -180,7 +180,7 @@ h3 { font-size: 19px; font-weight: 600; line-height: 1.25; margin: 0 0 7px; over
   .pie { flex-direction: column; align-items: flex-start; gap: 5px; }
 }
 
-/* Mejoras de M3 sobre el diseÃ±o original de M2 */
+/* Mejoras de M3 sobre el diseño original de M2 */
 button:disabled { cursor: progress; opacity: .7; }
 .filtros button { padding: 7px 12px; font-size: 12px; }
 .filtros button.activo { background: linear-gradient(#eaffeb, #8ed6ae); }

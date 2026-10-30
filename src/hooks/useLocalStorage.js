@@ -20,7 +20,7 @@ export default function useLocalStorage(clave, inicial) {
     }
   }, [clave, valor]);
 
-  // TambiÃ©n escuchamos cambios hechos desde otra pestaÃ±a.
+  // También escuchamos cambios hechos desde otra pestaña.
   useEffect(() => {
     function sincronizar(evento) {
       if (evento.key !== clave) return;

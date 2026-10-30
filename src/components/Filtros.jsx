@@ -15,7 +15,7 @@ export default function Filtros({ modo, onModo, soloFavoritos, onFavoritos, cant
         onClick={() => onFavoritos(!soloFavoritos)}
         aria-pressed={soloFavoritos}
       >
-        {soloFavoritos ? "Ver bÃºsqueda" : `Mis favoritos (${cantidad})`}
+        {soloFavoritos ? "Ver búsqueda" : `Mis favoritos (${cantidad})`}
       </button>
       <span>El filtro afecta a los 24 sets recibidos o a tus favoritos.</span>
     </div>
