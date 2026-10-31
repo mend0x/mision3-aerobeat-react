@@ -1,35 +1,52 @@
 import { useEffect, useState } from "react";
 import { buscarMapas } from "./api.js";
-import { prepararMapas, filtrarMapas } from "./logica.js";
+import { prepararMapas, filtrarMapas, ordenarMapas, contarDificultades } from "./logica.js";
 import useLocalStorage from "./hooks/useLocalStorage.js";
+import Cabecera from "./components/Cabecera.jsx";
+import Presentacion from "./components/Presentacion.jsx";
 import Buscador from "./components/Buscador.jsx";
 import Filtros from "./components/Filtros.jsx";
+import Ordenador from "./components/Ordenador.jsx";
+import EstadoResultados from "./components/EstadoResultados.jsx";
 import ListaMapas from "./components/ListaMapas.jsx";
 import Comparador from "./components/Comparador.jsx";
 
+const FAVORITOS_INICIALES = [];
+
 export default function App() {
   const [consulta, setConsulta] = useState("nevada");
+  // El número permite repetir una búsqueda aunque el texto sea el mismo.
   const [peticion, setPeticion] = useState({ texto: "nevada", numero: 0 });
-  const [resultado, setResultado] = useState({ mapas: [], origen: "", cargando: true, error: "" });
+  const [resultado, setResultado] = useState({ numero: -1, mapas: [], origen: "", error: "" });
   const [modo, setModo] = useState("todos");
+  const [orden, setOrden] = useState("original");
   const [soloFavoritos, setSoloFavoritos] = useState(false);
-  const [favoritos, setFavoritos] = useLocalStorage("aerobeat-m3:favoritos", []);
+  const [favoritosGuardados, setFavoritos] = useLocalStorage("aerobeat-m3:favoritos", FAVORITOS_INICIALES);
+  // La validación pertenece a la app, no al hook genérico.
+  const favoritos = Array.isArray(favoritosGuardados) ? favoritosGuardados : [];
   const [seleccion, setSeleccion] = useState([]);
 
-  // El efecto consulta un sistema externo. AbortController evita respuestas antiguas.
+  // La red es un sistema externo: por eso sí necesitamos useEffect.
   useEffect(() => {
     const controlador = new AbortController();
+
     buscarMapas(peticion.texto, controlador.signal)
       .then(({ datos, origen }) => {
         if (!controlador.signal.aborted) {
-          setResultado({ mapas: prepararMapas(datos), origen, cargando: false, error: "" });
+          setResultado({
+            numero: peticion.numero,
+            mapas: prepararMapas(datos),
+            origen,
+            error: ""
+          });
         }
       })
       .catch((error) => {
         if (!controlador.signal.aborted) {
-          setResultado({ mapas: [], origen: "", cargando: false, error: error.message });
+          setResultado({ numero: peticion.numero, mapas: [], origen: "", error: error.message });
         }
       });
+
     return () => controlador.abort();
   }, [peticion]);
 
@@ -37,19 +54,20 @@ export default function App() {
     evento.preventDefault();
     const texto = consulta.trim();
     if (!texto) return;
+
     setSoloFavoritos(false);
     setSeleccion([]);
-    setResultado({ mapas: [], origen: "", cargando: true, error: "" });
-    // numero permite volver a buscar el mismo texto al pulsar el botón.
+    // No actualizamos "cargando" a mano: se deduce del número de petición.
     setPeticion((anterior) => ({ texto, numero: anterior.numero + 1 }));
   }
 
   function alternarFavorito(mapa) {
-    setFavoritos((anteriores) =>
-      anteriores.some((favorito) => favorito.id === mapa.id)
+    setFavoritos((guardados) => {
+      const anteriores = Array.isArray(guardados) ? guardados : [];
+      return anteriores.some((favorito) => favorito.id === mapa.id)
         ? anteriores.filter((favorito) => favorito.id !== mapa.id)
-        : [mapa, ...anteriores]
-    );
+        : [mapa, ...anteriores];
+    });
   }
 
   function alternarComparacion(id) {
@@ -59,55 +77,73 @@ export default function App() {
     });
   }
 
-  // Estos valores se DERIVAN durante el render: no necesitan useState ni useEffect.
+  function cambiarModo(nuevoModo) {
+    setModo(nuevoModo);
+    setSeleccion([]);
+  }
+
+  function cambiarBiblioteca(activo) {
+    setSoloFavoritos(activo);
+    setSeleccion([]);
+  }
+
+  // Estos datos son DERIVADOS. No requieren otro estado ni otro efecto.
+  const cargando = resultado.numero !== peticion.numero;
   const base = soloFavoritos ? favoritos : resultado.mapas;
-  const visibles = filtrarMapas(base, modo);
-  const comparados = seleccion.map((id) => base.find((mapa) => mapa.id === id)).filter(Boolean);
+  const visibles = ordenarMapas(filtrarMapas(base, modo), orden);
+  const idsFavoritos = new Set(favoritos.map((mapa) => mapa.id));
+  const idsSeleccionados = new Set(seleccion);
+  const comparados = seleccion.map((id) => visibles.find((mapa) => mapa.id === id)).filter(Boolean);
+  const mostrarLista = soloFavoritos || (!cargando && !resultado.error);
 
   return (
     <>
-      <header className="cabecera">
-        <a className="marca" href="./"><span className="orbe" aria-hidden="true">a</span> aerobeat</a>
-        <span className="subtitulo">M3 · Reactor Core · React 19</span>
-        <a href="https://osu.ppy.sh/" target="_blank" rel="noopener noreferrer">Conoce osu!</a>
-      </header>
+      <Cabecera />
       <main className="ventana">
-        <div className="barra-ventana"><span>Aerobeat / Explorador de mapas</span><span>EDICIÓN REACT</span></div>
-        <section className="presentacion" aria-labelledby="titulo">
-          <div>
-            <p className="antetitulo">MÚSICA. CÍRCULOS. Y UN POCO DE NOSTALGIA.</p>
-            <h1 id="titulo">Encuentra tu ritmo.</h1>
-            <p>Busca mapas de osu!, guarda tus favoritos y compara dificultades.</p>
-          </div>
-          <div className="disco" aria-hidden="true"><span>osu!</span></div>
-        </section>
+        <div className="barra-ventana">
+          <span>Aerobeat / Explorador de mapas</span>
+          <span>EDICIÓN REACT</span>
+        </div>
+        <Presentacion />
         <section className="explorador" aria-label="Buscador de mapas">
           <Buscador
             consulta={consulta}
             onConsulta={setConsulta}
             onBuscar={enviarBusqueda}
-            cargando={resultado.cargando}
+            cargando={cargando}
           />
           <Filtros
             modo={modo}
-            onModo={setModo}
+            onModo={cambiarModo}
             soloFavoritos={soloFavoritos}
-            onFavoritos={(activo) => { setSoloFavoritos(activo); setSeleccion([]); }}
+            onFavoritos={cambiarBiblioteca}
             cantidad={favoritos.length}
           />
-          <div className="resultados-cabecera"><h2>{soloFavoritos ? "Mi biblioteca" : "Tu selección"}</h2></div>
+          <div className="resultados-cabecera">
+            <h2>{soloFavoritos ? "Mi biblioteca" : "Tu selección"}</h2>
+            <Ordenador orden={orden} onOrden={setOrden} />
+          </div>
           <Comparador mapas={comparados} onLimpiar={() => setSeleccion([])} />
-          <ListaMapas
-            mapas={visibles}
-            cargando={resultado.cargando}
-            error={resultado.error}
-            origen={resultado.origen}
-            soloFavoritos={soloFavoritos}
-            favoritos={favoritos}
-            seleccion={seleccion}
-            onFavorito={alternarFavorito}
-            onComparar={alternarComparacion}
+          <EstadoResultados
+            cargando={!soloFavoritos && cargando}
+            error={soloFavoritos || cargando ? "" : resultado.error}
           />
+          {mostrarLista && (
+            <>
+              {visibles.length > 0 && (
+                <p className="resumen">
+                  {visibles.length} sets · {contarDificultades(visibles)} dificultades · {soloFavoritos ? "Tus favoritos" : resultado.origen}
+                </p>
+              )}
+              <ListaMapas
+                mapas={visibles}
+                idsFavoritos={idsFavoritos}
+                idsSeleccionados={idsSeleccionados}
+                onFavorito={alternarFavorito}
+                onComparar={alternarComparacion}
+              />
+            </>
+          )}
         </section>
         <footer className="pie-ventana">
           <span>Descarga el .osz y ábrelo con osu! para instalarlo.</span>

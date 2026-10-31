@@ -1,9 +1,11 @@
+import { compararMapas, contarModos } from "../logica.js";
+
+const ETIQUETAS = { osu: "osu!", taiko: "Taiko", fruits: "Catch", mania: "Mania" };
+
 export default function Comparador({ mapas, onLimpiar }) {
   if (mapas.length === 0) return null;
 
-  const diferencia = mapas.length === 2
-    ? Math.abs(mapas[0].dificultades.length - mapas[1].dificultades.length)
-    : 0;
+  const comparacion = mapas.length === 2 ? compararMapas(mapas[0], mapas[1]) : null;
 
   return (
     <section className="comparador" aria-label="Comparación de mapas">
@@ -19,15 +21,19 @@ export default function Comparador({ mapas, onLimpiar }) {
             {mapas.map((mapa) => (
               <div key={mapa.id}>
                 <strong>{mapa.titulo}</strong>
-                <span>{mapa.artista} · {mapa.dificultades.length} dificultades</span>
+                <span>{mapa.artista} · creador: {mapa.creador}</span>
+                <span>{mapa.dificultades.length} dificultades</span>
+                <ul className="modos-comparacion">
+                  {contarModos(mapa).map(({ modo, cantidad }) => (
+                    <li key={modo}>{ETIQUETAS[modo] || modo}: {cantidad}</li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-          <p>
-            {diferencia === 0
-              ? "Ambos sets tienen el mismo número de dificultades."
-              : `${mapas[0].dificultades.length > mapas[1].dificultades.length ? mapas[0].titulo : mapas[1].titulo} tiene ${diferencia} dificultades más.`}
-          </p>
+          <p>{comparacion.textoDiferencia}</p>
+          <p>{comparacion.textoVariedad}</p>
+          <p>{comparacion.textoCompartidos}</p>
         </>
       )}
     </section>

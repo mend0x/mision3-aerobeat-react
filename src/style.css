@@ -200,3 +200,10 @@ button:disabled { cursor: progress; opacity: .7; }
 .comparador-columnas strong, .comparador-columnas span { display: block; overflow-wrap: anywhere; }
 .comparador-columnas span { font-size: 11px; margin-top: 6px; }
 @media (max-width: 560px) { .comparador-columnas { grid-template-columns: 1fr; } }
+/* M3: ordenación y comparación detallada */
+.resultados-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ordenador { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+.ordenador label { margin: 0; }
+.ordenador select { max-width: 180px; padding: 6px 8px; }
+.modos-comparacion { display: flex; flex-wrap: wrap; gap: 5px 12px; padding: 0; margin: 10px 0 0; list-style: none; font-size: 11px; }
+.modos-comparacion li { background: #e8f5fb; border-radius: 5px; padding: 4px 7px; }
