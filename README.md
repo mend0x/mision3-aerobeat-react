@@ -84,3 +84,22 @@ Se ha utilizado ChatGPT para analizar el código público de M2, proponer la mig
 6. Ejecutar `npm run lint` y `npm run build` antes de entregar.
 
 No se incluyen `node_modules` ni `dist` en Git. Proyecto académico sin afiliación con osu! o hinai. Portadas de osu! y enlaces de terceros.
+
+
+## Mejoras tras la revisión de M3
+
+Esta versión conserva la migración de M2 a React 19 y refina lo que solicitó la evaluación:
+
+- **Componentización:** `Cabecera`, `Presentacion` y `EstadoResultados` separan responsabilidades. `ListaMapas` recibe cinco props, frente a las nueve anteriores. `Ordenador` es un componente independiente.
+- **Estado mínimo:** `resultado` almacena el número de búsqueda terminada, datos y error. `cargando` se **deriva** comparando ese número con el de la petición vigente; no se actualiza a mano al pulsar Buscar. El contador en `peticion` es necesario para permitir repetir una búsqueda idéntica.
+- **Efectos:** la petición conserva su `AbortController` y cleanup. El hook `useLocalStorage` admite cualquier valor JSON, escucha `storage` con limpieza y evita escribir de nuevo un valor que ya existe.
+- **Listas:** se calculan `Set` de identificadores de favoritos y seleccionados, con `.has(id)` para cada tarjeta. Las keys siguen siendo `mapa.id`.
+- **Originalidad:** los mapas se ordenan por título, artista o número de dificultades; el comparador enseña las dificultades de cada modo, la variedad de modos y los modos compartidos, sin confundir cantidad con dificultad técnica.
+
+### Autopsia de los cambios
+
+El mayor problema era que `ListaMapas` asumía demasiadas decisiones ajenas a su responsabilidad. Ahora `App` calcula qué mostrar y `EstadoResultados` se ocupa de carga/error. No se crean estados para las listas visibles, el orden aplicado ni los informes del comparador: son resultados de funciones puras en `logica.js`. El estado de petición usa un número para identificar una búsqueda actual y descartar visualmente datos antiguos mientras se solicita otra. El hook de favoritos evita escrituras redundantes cuando recibe un evento de otra pestaña.
+
+**Uso de IA en esta revisión:** ChatGPT ayudó a proponer estos cambios, redactar y generar el parche, actualizar la documentación y diseñar comprobaciones. El código debe revisarse y entenderse antes de la defensa.
+
+**Pruebas manuales:** buscar un término, repetir la misma búsqueda, ordenar resultados, cambiar de modo, guardar favoritos y abrirlos en otra pestaña; comparar dos mapas, comprobar los modos compartidos y ejecutar `npm run lint` y `npm run build`.
